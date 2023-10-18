@@ -1,6 +1,7 @@
 const createError = require("../error/errors");
 const bcrypt = require('bcryptjs');
 const UserModel = require("../model/userModel.js");
+ const jwt = require('jsonwebtoken')
 
 /**
  * Controller function for user signup
