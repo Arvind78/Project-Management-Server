@@ -35,7 +35,7 @@ const userSignup = async (req, res, next) => {
     }
 };
 
- 
+
 const userLogin = async (req, res, next) => {
     console.log(req.body);
     const { email, password } = req.body;
@@ -51,16 +51,41 @@ const userLogin = async (req, res, next) => {
         if (!isPasswordValid) {
             return res.status(401).json({ success: false, message: "Invalid Email or Password" });
         }
-      
+
         // login token based on user login status
-        const token = user._id;
+        const token =  jwt.sign({ id :user._id },secretKey);
 
         // Return success response
-        res.status(200).json({ success: true, message: "Valid User" ,token});
+        res.status(200).json({ success: true, message: "Valid User", token });
     } catch (error) {
         // Handle errors and pass them to the error handling middleware
         next(error);
     }
 };
 
-module.exports = { userSignup, userLogin };
+const forgotPassword = async (req, res, next) => {
+    const { email, userId, newPassword } = req.body;
+    try {
+        if (!userId) {
+                // Logic for  verification email check
+            const user = await UserModel.findOne({ email });
+            if (!user) {
+                return res.status(404).json({ success: false, message: "Invalid Credentials" });
+            } else {
+                return res.status(201).json({ userId: user._id, message: "User verification successfully !" });
+         }
+        } else {
+               // Hash the new password before updating in the database
+            const hashPassword = await bcrypt.hash(newPassword, 10);
+              // Update user password in the database using userId
+            const newPass = await UserModel.findByIdAndUpdate(userId, { $set: { password: hashPassword } }, { new: true })
+            return res.status(201).json({ message: "User password reset successfully!" });
+        }
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+module.exports = { userSignup, userLogin, forgotPassword };
