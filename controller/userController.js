@@ -54,7 +54,7 @@ const userLogin = async (req, res, next) => {
         }
 
         // login token based on user login status
-        const token =  jwt.sign({ id :user._id },process.env.secretKey);
+        const token =  jwt.sign({ id :user._id },process.env.SECRET_KEY);
 
         // Return success response
         res.status(200).json({ success: true, message: "Valid User", token });
