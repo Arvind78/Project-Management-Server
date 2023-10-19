@@ -118,11 +118,62 @@ const searchProject = async (req, res, next) => {
     }
 };
 
+// Controller function to get department-wise success percentage data for the chart
+const getDepartmentSuccessPercentage = async (req, res, next) => {
+    try {
+        const departmentData = await projectModel.aggregate([
+            {
+                $match: { status: "Closed" } // Filter only closed projects
+            },
+            {
+                $group: {
+                    _id: "$department",
+                    totalProjects: { $sum: 1 },
+                    closedProjects: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    department: "$_id",
+                    total: "$totalProjects",
+                    closed: "$closedProjects",
+                    successPercentage: {
+                        $cond: [
+                            { $eq: ["$totalProjects", 0] },
+                            0,
+                            { $multiply: [{ $divide: ["$closedProjects", "$totalProjects"] }, 100] }
+                        ]
+                    }
+                }
+            }
+        ]);
+
+        const chartData = {};
+        departmentData.forEach(department => {
+            chartData[department.department] = {
+                total: department.total,
+                closed: department.closed,
+                successPercentage: department.successPercentage.toFixed(2) + "%"
+            };
+        });
+
+        return res.status(200).json({ departmentSuccessPercentage: chartData });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // Export the handlers for use in routes
 module.exports = {
+    getDepartmentSuccessPercentage,
+    // Include other controller functions as needed
     addProject,
     searchProject,
     getProjects,
     updateProject,
     sortProject
 };
+
+
+
+

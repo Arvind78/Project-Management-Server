@@ -1,6 +1,6 @@
 const express = require('express');
 const { userLogin, userSignup ,forgotPassword} = require('../controller/userController');
-const { addProject, getProjects, updateProject, searchProject, sortProject } = require('../controller/projectController');
+const { addProject, getProjects, updateProject, searchProject, sortProject, getDepartmentSuccessPercentage } = require('../controller/projectController');
 const router = express.Router(); // Use 'router' instead of 'routes' for consistency and clarity
 
 // Route for user signup
@@ -26,6 +26,7 @@ router.get("/search", searchProject );
 
 //Route for sort project status
 router.get("/sort",sortProject ); 
+router.get("/success/data",getDepartmentSuccessPercentage); 
 
 
 module.exports = router;
