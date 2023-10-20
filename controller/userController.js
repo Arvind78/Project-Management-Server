@@ -1,7 +1,6 @@
-const createError = require("../error/errors");
 const bcrypt = require('bcryptjs');
 const UserModel = require("../model/userModel.js");
- const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 /**
  * Controller function for user signup
@@ -9,7 +8,6 @@ const UserModel = require("../model/userModel.js");
  * @param {Object} res - Express response object
  * @param {function} next - Express next middleware function 
  */
-
 const userSignup = async (req, res, next) => {
     const { email, password } = req.body;
     try {
@@ -36,9 +34,13 @@ const userSignup = async (req, res, next) => {
     }
 };
 
-
+/**
+ * Controller function for user login
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {function} next - Express next middleware function 
+ */
 const userLogin = async (req, res, next) => {
-    console.log(req.body);
     const { email, password } = req.body;
     try {
         // Find the user by email
@@ -53,10 +55,10 @@ const userLogin = async (req, res, next) => {
             return res.status(401).json({ success: false, message: "Invalid Email or Password" });
         }
 
-        // login token based on user login status
-        const token =  jwt.sign({ id :user._id },process.env.SECRET_KEY);
+        // Generate a login token based on user login status
+        const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY);
 
-        // Return success response
+        // Return success response with token
         res.status(200).json({ success: true, message: "Valid User", token });
     } catch (error) {
         // Handle errors and pass them to the error handling middleware
@@ -64,29 +66,35 @@ const userLogin = async (req, res, next) => {
     }
 };
 
+/**
+ * Controller function for handling password reset and verification
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {function} next - Express next middleware function 
+ */
+
 const forgotPassword = async (req, res, next) => {
     const { email, userId, newPassword } = req.body;
     try {
         if (!userId) {
-                // Logic for  verification email check
+            // Logic for verification email check
             const user = await UserModel.findOne({ email });
             if (!user) {
                 return res.status(404).json({ success: false, message: "Invalid Credentials" });
             } else {
-                return res.status(201).json({ userId: user._id, message: "User verification successfully !" });
-         }
+                return res.status(201).json({ userId: user._id, message: "User verification successful!" });
+            }
         } else {
-               // Hash the new password before updating in the database
-            const hashPassword = await bcrypt.hash(newPassword, 10);
-              // Update user password in the database using userId
-            const newPass = await UserModel.findByIdAndUpdate(userId, { $set: { password: hashPassword } }, { new: true })
+            // Hash the new password before updating in the database
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            // Update user password in the database using userId
+            const updatedUser = await UserModel.findByIdAndUpdate(userId, { $set: { password: hashedPassword } }, { new: true });
             return res.status(201).json({ message: "User password reset successfully!" });
         }
     } catch (error) {
-        next(error)
+        // Handle errors and pass them to the error handling middleware
+        next(error);
     }
-}
-
-
+};
 
 module.exports = { userSignup, userLogin, forgotPassword };

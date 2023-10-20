@@ -4,8 +4,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     email: { 
         type: String, 
-        required: true, // Specify that email is required
-        unique: true, // Ensure emails are unique in the database
+        required: true, // Specify that email is require  
         trim: true // Trim whitespace from the beginning and end of email
     },
     password: { 

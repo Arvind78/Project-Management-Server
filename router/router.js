@@ -1,32 +1,30 @@
 const express = require('express');
-const { userLogin, userSignup ,forgotPassword} = require('../controller/userController');
-const { addProject, getProjects, updateProject, searchProject, sortProject, getDepartmentSuccessPercentage } = require('../controller/projectController');
-const router = express.Router(); // Use 'router' instead of 'routes' for consistency and clarity
+const { userLogin, userSignup, forgotPassword } = require('../controller/userController');
+const { addProject, getProjects, updateProject, sortProject, getDepartmentSuccessPercentage } = require('../controller/projectController');
+const router = express.Router(); // Create an Express router for defining API routes
 
 // Route for user signup
-router.post("/usersignup", userSignup); 
+router.post("/usersignup", userSignup); // Handles user registration
 
 // Route for user login
-router.post("/userlogin", userLogin);
+router.post("/userlogin", userLogin); // Handles user login
 
 // Route for user forgot password
-router.post("/forget", forgotPassword);
+router.post("/forget", forgotPassword); // Handles user password recovery
 
-//Route for new project
-router.post("/newproject", addProject); 
+// Route for adding a new project
+router.post("/newproject", addProject); // Handles project creation
 
-//Route for all project
-router.get("/allproject", getProjects); 
+// Route for retrieving all projects
+router.get("/allproject", getProjects); // Retrieves all projects
 
-//Route for update project status
-router.post("/update", updateProject); 
+// Route for updating project status
+router.post("/update", updateProject); // Handles project status update
 
-//Route for search project status
-router.get("/search", searchProject ); 
+// Route for sorting project status
+router.get("/sort", sortProject); // Sorts projects based on status
 
-//Route for sort project status
-router.get("/sort",sortProject ); 
-router.get("/success/data",getDepartmentSuccessPercentage); 
+// Route for retrieving department success percentage data
+router.get("/success/data", getDepartmentSuccessPercentage); // Retrieves success percentage data for departments
 
-
-module.exports = router;
+module.exports = router; // Export the router for use in the application

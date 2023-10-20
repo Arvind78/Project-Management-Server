@@ -79,39 +79,18 @@ const sortProject = async (req, res, next) => {
         const { q } = req.query;
         const validSortFields = ["priority", "category", "reason", "division", "department", "location"];
 
+        // Validate the sorting field
         if (!validSortFields.includes(q)) {
             return res.status(400).json({ message: "Invalid sorting field" });
         }
 
+        // Create a sort field object based on the query parameter
         const sortField = {};
         sortField[q] = 1;
 
+        // Retrieve and send sorted projects as a response
         const projects = await projectModel.find({}).sort(sortField);
         return res.status(200).json({ projects });
-    } catch (error) {
-        next(error);
-    }
-};
-
-module.exports = sortProject;
-
-
-// Handler to search for a specific project
-const searchProject = async (req, res, next) => {
-    try {
-        // Extract search query from request parameters
-        const queryParam = req.query.q;
-
-        // Validate presence of search query
-        if (queryParam) {
-            // Search for projects with the specified project name
-            const data = await projectModel.find({ project: queryParam });
-            // Send search results as a response
-            return res.status(200).json({ data });
-        } else {
-            // If search query is missing, send a bad request response
-            return res.status(400).json({ message: "Query parameter is required for search!" });
-        }
     } catch (error) {
         // Pass errors to the error handling middleware
         next(error);
@@ -121,15 +100,13 @@ const searchProject = async (req, res, next) => {
 // Controller function to get department-wise success percentage data for the chart
 const getDepartmentSuccessPercentage = async (req, res, next) => {
     try {
+        // Aggregate data to calculate department-wise success percentage
         const departmentData = await projectModel.aggregate([
-            {
-                $match: { status: "Closed" } // Filter only closed projects
-            },
             {
                 $group: {
                     _id: "$department",
                     totalProjects: { $sum: 1 },
-                    closedProjects: { $sum: 1 }
+                    closedProjects: { $sum: { $cond: [{ $eq: ["$status", "Closed"] }, 1, 0] } }
                 }
             },
             {
@@ -148,6 +125,7 @@ const getDepartmentSuccessPercentage = async (req, res, next) => {
             }
         ]);
 
+        // Format the data and send it as a response
         const chartData = {};
         departmentData.forEach(department => {
             chartData[department.department] = {
@@ -159,6 +137,7 @@ const getDepartmentSuccessPercentage = async (req, res, next) => {
 
         return res.status(200).json({ departmentSuccessPercentage: chartData });
     } catch (error) {
+        // Pass errors to the error handling middleware
         next(error);
     }
 };
@@ -166,14 +145,8 @@ const getDepartmentSuccessPercentage = async (req, res, next) => {
 // Export the handlers for use in routes
 module.exports = {
     getDepartmentSuccessPercentage,
-    // Include other controller functions as needed
     addProject,
-    searchProject,
     getProjects,
     updateProject,
     sortProject
 };
-
-
-
-
