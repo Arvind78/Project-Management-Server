@@ -142,11 +142,54 @@ const getDepartmentSuccessPercentage = async (req, res, next) => {
     }
 };
 
+// Controller function to count various project statistics
+const projectCounter = async (req, res, next) => {
+    try {
+        // Count total projects
+        const totalProjects = await projectModel.countDocuments();
+        // Count total closed projects
+        const totalClosedProjects = await projectModel.countDocuments({ status: 'Closed' });
+        // Count total running projects (projects that are not closed or canceled)
+        const totalRunningProjects = await projectModel.countDocuments({ status: 'Running' });
+        // Count total canceled projects
+        const totalCancelledProjects = await projectModel.countDocuments({ status: 'Cancelled' });
+        // Count delayed projects (projects with end dates in the past and not closed)
+        const currentDate = new Date();
+
+        // Get year, month, and day components
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        
+        // Format the date as "YYYY-MM-DD"
+        const today = `${year}-${month}-${day}`;
+
+        // Count projects with end dates in the past and not closed, started before today
+        const totalDelayedProjects = await projectModel.countDocuments({
+            status: { $ne: 'Closed' },
+            endDate: { $lt: today },
+            startDate: { $lt: today }
+        });
+
+        return res.status(200).json({
+            totalProjects,
+            totalClosedProjects,
+            totalRunningProjects,
+            totalCancelledProjects,
+            totalDelayedProjects
+        });
+    } catch (error) {
+        // Pass errors to the error handling middleware
+        next(error);
+    }
+};
+
 // Export the handlers for use in routes
 module.exports = {
     getDepartmentSuccessPercentage,
     addProject,
     getProjects,
     updateProject,
-    sortProject
+    sortProject,
+    projectCounter
 };

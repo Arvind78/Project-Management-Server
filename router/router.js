@@ -1,6 +1,6 @@
 const express = require('express');
 const { userLogin, userSignup, forgotPassword } = require('../controller/userController');
-const { addProject, getProjects, updateProject, sortProject, getDepartmentSuccessPercentage } = require('../controller/projectController');
+const { addProject, getProjects, updateProject, sortProject, getDepartmentSuccessPercentage, projectCounter } = require('../controller/projectController');
 const router = express.Router(); // Create an Express router for defining API routes
 
 // Route for user signup
@@ -26,5 +26,7 @@ router.get("/sort", sortProject); // Sorts projects based on status
 
 // Route for retrieving department success percentage data
 router.get("/success/data", getDepartmentSuccessPercentage); // Retrieves success percentage data for departments
+
+router.get("/project/counter", projectCounter); // Retrieves success percentage data for departments
 
 module.exports = router; // Export the router for use in the application
