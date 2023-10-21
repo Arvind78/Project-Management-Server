@@ -27,6 +27,7 @@ router.get("/sort", sortProject); // Sorts projects based on status
 // Route for retrieving department success percentage data
 router.get("/success/data", getDepartmentSuccessPercentage); // Retrieves success percentage data for departments
 
-router.get("/project/counter", projectCounter); // Retrieves success percentage data for departments
+// Route for retrieving project statistics (total projects, closed projects, running projects, cancelled projects, delayed projects)
+router.get("/project/counter", projectCounter);
 
 module.exports = router; // Export the router for use in the application
