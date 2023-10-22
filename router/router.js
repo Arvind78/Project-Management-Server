@@ -10,7 +10,7 @@ router.post("/usersignup", userSignup); // Handles user registration
 router.post("/userlogin", userLogin); // Handles user login
 
 // Route for user forgot password
-router.post("/forget", forgotPassword); // Handles user password recovery
+router.put("/forget", forgotPassword); // Handles user password recovery
 
 // Route for adding a new project
 router.post("/newproject", addProject); // Handles project creation
