@@ -81,7 +81,7 @@ const forgotPassword = async (req, res, next) => {
             // Logic for verification email check
             const user = await UserModel.findOne({ email });
             if (!user) {
-                return next(error(404,"Email is ragistered"));
+                return next();
             } else {
                 return res.status(201).json({ userId: user._id, message: "User verification successful!" });
             }
