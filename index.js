@@ -22,7 +22,7 @@ app.use((err, req, res, next) => {
     const success = false;
     const status = err.status || 500; // Set HTTP status code to the error status or 500 (Internal Server Error)
     const message = err.message || "Something went wrong"; // Use the error message provided or a default message
-    res.status(status).json({ success, message }); // Send JSON response with error status and message
+    res.status(status).json({ status, message ,success}); // Send JSON response with error status and message
 });
 
 // Start the server and establish database connection
