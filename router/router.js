@@ -25,7 +25,7 @@ router.post("/update", updateProject); // Handles project status update
 router.get("/sort", sortProject); // Sorts projects based on status
 
 // Route for retrieving department success percentage data
-router.get("/success/data", getDepartmentSuccessPercentage); // Retrieves success percentage data for departments
+router.get("/chart/data", getDepartmentSuccessPercentage); // Retrieves success percentage data for departments
 
 // Route for retrieving project statistics (total projects, closed projects, running projects, cancelled projects, delayed projects)
 router.get("/project/counter", projectCounter);
