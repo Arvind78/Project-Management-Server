@@ -87,7 +87,7 @@ const sortProject = async (req, res, next) => {
         // Create a sort field object based on the query parameter
         const sortField = {};
         sortField[q] = 1;
-
+ 
         // Retrieve and send sorted projects as a response
         const projects = await projectModel.find({}).sort(sortField);
         return res.status(200).json({ projects });
