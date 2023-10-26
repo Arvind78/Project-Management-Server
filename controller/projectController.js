@@ -1,18 +1,14 @@
-// Import the project model
 const projectModel = require("../model/projectModel");
 
-// Handler to add a new project
+//Adds a new project to the database.
 const addProject = async (req, res, next) => {
     try {
-        // Extract project details from the request body
         const { project, reason, type, division, category, priority, department, startDate, endDate, location } = req.body;
 
-        // Validate required fields
         if (!project || !reason || !type || !division || !category || !priority || !department || !startDate || !endDate || !location) {
             return res.status(400).json({ message: "All fields are required!" });
         }
 
-        // Format start and end dates
         const startdate = new Date(startDate);
         const start = startdate.toLocaleDateString('en-GB', {
             day: 'numeric', month: 'short', year: 'numeric'
@@ -23,148 +19,112 @@ const addProject = async (req, res, next) => {
             day: 'numeric', month: 'short', year: 'numeric'
         }).replace(/ /g, '-');
 
-        // Create a new project with formatted dates
         const newProject = await projectModel.create({
             ...req.body,
             startDate: start,
             endDate: end
         });
 
-        // Send success response
         return res.status(201).json({ message: "New project registered successfully!" });
     } catch (error) {
-        // Pass errors to the error handling middleware
         next(error);
     }
 };
 
-// Handler to get all projects
+//Retrieves all projects from the database.
 const getProjects = async (req, res, next) => {
     try {
-        // Retrieve all projects from the database
         const projects = await projectModel.find({});
-        // Send projects as a response
         return res.status(200).json({ projects });
     } catch (error) {
-        // Pass errors to the error handling middleware
         next(error);
     }
 };
 
-// Handler to update project status
+//Updates the status of a project in the database.
 const updateProject = async (req, res, next) => {
     try {
-        // Extract status and project ID from the request body
         const { status, id } = req.body;
 
-        // Validate presence of status field
         if (status) {
-            // Update project status in the database
             const updatedProject = await projectModel.findByIdAndUpdate(id, { $set: { status: status } }, { new: true });
-            // Send success response
             return res.status(200).json({ message: "Project status updated successfully!" });
         }
 
-        // If status field is missing, send a bad request response
         return res.status(400).json({ message: "Status field is required for update!" });
     } catch (error) {
-        // Pass errors to the error handling middleware
         next(error);
     }
 };
 
-// Handler to sort projects based on query parameters
+//Sorts projects based on specified query parameters.
 const sortProject = async (req, res, next) => {
     try {
         const { q } = req.query;
         const validSortFields = ["priority", "category", "reason", "division", "department", "location"];
 
-        // Validate the sorting field
         if (!validSortFields.includes(q)) {
             return res.status(400).json({ message: "Invalid sorting field" });
         }
 
-        // Create a sort field object based on the query parameter
         const sortField = {};
         sortField[q] = 1;
- 
-        // Retrieve and send sorted projects as a response
+
         const projects = await projectModel.find({}).sort(sortField);
         return res.status(200).json({ projects });
     } catch (error) {
-        // Pass errors to the error handling middleware
         next(error);
     }
 };
 
-// Controller function to get department-wise success percentage data for the chart
+//Retrieves department-wise success percentage data for generating a chart.
 const getDepartmentSuccessPercentage = async (req, res, next) => {
     try {
-        // Aggregate data to calculate department-wise success percentage
         const departmentData = await projectModel.aggregate([
             {
                 $group: {
                     _id: "$department",
                     totalProjects: { $sum: 1 },
-                    closedProjects: { $sum: { $cond: [{ $eq: ["$status", "Closed"] }, 1, 0] } }
-                }
-            },
-            {
-                $project: {
-                    department: "$_id",
-                    total: "$totalProjects",
-                    closed: "$closedProjects",
-                    successPercentage: {
-                        $cond: [
-                            { $eq: ["$totalProjects", 0] },
-                            0,
-                            { $multiply: [{ $divide: ["$closedProjects", "$totalProjects"] }, 100] }
-                        ]
+                    closedProjects: {
+                        $sum: {
+                            $cond: [{ $eq: ["$status", "Closed"] }, 1, 0]
+                        }
                     }
                 }
             }
         ]);
 
-        // Format the data and send it as a response
-        const chartData = {};
-        departmentData.forEach(department => {
-            chartData[department.department] = {
-                total: department.total,
-                closed: department.closed,
-                successPercentage: department.successPercentage.toFixed(2) + "%"
-            };
-        });
+        const chartData = departmentData.map(department => ({
+            department: department._id,
+            total: department.totalProjects,
+            closed: department.closedProjects,
+            successPercentage:
+                department.totalProjects === 0
+                    ? 0
+                    : ((department.closedProjects / department.totalProjects) * 100).toFixed(2) + "%"
+        }));
 
         return res.status(200).json({ departmentSuccessPercentage: chartData });
     } catch (error) {
-        // Pass errors to the error handling middleware
         next(error);
     }
 };
 
-// Controller function to count various project statistics
+
+// Retrieves various statistics about the projects.
 const projectCounter = async (req, res, next) => {
     try {
-        // Count total projects
         const totalProjects = await projectModel.countDocuments();
-        // Count total closed projects
         const totalClosedProjects = await projectModel.countDocuments({ status: 'Closed' });
-        // Count total running projects (projects that are not closed or canceled)
         const totalRunningProjects = await projectModel.countDocuments({ status: 'Running' });
-        // Count total canceled projects
         const totalCancelledProjects = await projectModel.countDocuments({ status: 'Cancelled' });
-        // Count delayed projects (projects with end dates in the past and not closed)
+
         const currentDate = new Date();
-
-        // Get year, month, and day components
         const year = currentDate.getFullYear();
-        const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');  
         const day = String(currentDate.getDate()).padStart(2, '0');
-        
-        // Format the date as "YYYY-MM-DD"
-        const today = `${year}-${month}-${day}`;
+        const today = `${year}-${month}-${day}`; 
 
-        // Count projects with end dates in the past and not closed, started before today
         const totalDelayedProjects = await projectModel.countDocuments({
             status: { $ne: 'Closed' },
             endDate: { $lt: today },
@@ -179,12 +139,11 @@ const projectCounter = async (req, res, next) => {
             totalDelayedProjects
         });
     } catch (error) {
-        // Pass errors to the error handling middleware
         next(error);
     }
 };
 
-// Export the handlers for use in routes
+// exports functions related to project management operations.
 module.exports = {
     getDepartmentSuccessPercentage,
     addProject,

@@ -1,33 +1,21 @@
 const express = require('express');
 const { userLogin, userSignup, forgotPassword } = require('../controller/userController');
 const { addProject, getProjects, updateProject, sortProject, getDepartmentSuccessPercentage, projectCounter } = require('../controller/projectController');
-const router = express.Router(); // Create an Express router for defining API routes
+// Creating an Express router instance
+const router = express.Router();  
 
-// Route for user signup
-router.post("/usersignup", userSignup); // Handles user registration
+// Routes for user-related operations
+router.post("/usersignup", userSignup);  
+router.post("/userlogin", userLogin);  
+router.put("/forget", forgotPassword); 
 
-// Route for user login
-router.post("/userlogin", userLogin); // Handles user login
-
-// Route for user forgot password
-router.put("/forget", forgotPassword); // Handles user password recovery
-
-// Route for adding a new project
-router.post("/newproject", addProject); // Handles project creation
-
-// Route for retrieving all projects
-router.get("/allproject", getProjects); // Retrieves all projects
-
-// Route for updating project status
-router.put("/update", updateProject); // Handles project status update
-
-// Route for sorting project status
-router.get("/sort", sortProject); // Sorts projects based on status
-
-// Route for retrieving department success percentage data
-router.get("/chart/data", getDepartmentSuccessPercentage); // Retrieves success percentage data for departments
-
-// Route for retrieving project statistics (total projects, closed projects, running projects, cancelled projects, delayed projects)
+// Routes for project-related operations
+router.post("/newproject", addProject);  
+router.get("/allproject", getProjects); 
+router.put("/update", updateProject); 
+router.get("/sort", sortProject); 
+router.get("/chart/data", getDepartmentSuccessPercentage); 
 router.get("/project/counter", projectCounter);
 
-module.exports = router; // Export the router for use in the application
+// Exporting the router for use in the main application
+module.exports = router;

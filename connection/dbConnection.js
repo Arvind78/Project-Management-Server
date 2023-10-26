@@ -7,12 +7,11 @@ const connectToDatabase = async () => {
         console.log('Database Connected Successfully!');
     } catch (error) {
         console.error('Error connecting to the database:', error.message);
-        // You can choose to throw the error here or handle it in another way, such as exiting the application.
-        // throw error;
-        process.exit(1); // Exit the Node.js process with a failure code
+        // Exit the Node.js process with a failure code
+        process.exit(1); 
     }
 };
-
+// Export the function for use in other parts of the application
 module.exports = connectToDatabase;
 
 

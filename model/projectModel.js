@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
-// Defining the project schema for MongoDB
+// Define the schema for the 'Project' model in MongoDB
 const projectSchema = new mongoose.Schema({
-  // Naming convention: Use camelCase for variable and property names
   project: { type: String, required: true }, 
   reason: { type: String, required: true },
   type: { type: String, required: true },
@@ -13,8 +12,8 @@ const projectSchema = new mongoose.Schema({
   startDate: { type: String, required: true },
   endDate: { type: String, required: true },
   location: { type: String, required: true },
-  status: { type: String, default: 'Registered' } // Default value for status property
+  status: { type: String, default: 'Registered' }  
 });
 
-// Creating and exporting mongoose model based on the defined schema
+// Create and export the 'Project' model based on the defined schema
 module.exports = mongoose.model('Project', projectSchema);

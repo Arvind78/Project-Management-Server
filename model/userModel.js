@@ -1,17 +1,17 @@
 const mongoose = require('mongoose');
 
-// Define a schema for the user model
+// Define the schema for the 'User' model in MongoDB
 const userSchema = new mongoose.Schema({
     email: { 
         type: String, 
-        required: true, // Specify that email is require  
-        trim: true // Trim whitespace from the beginning and end of email
+        required: true, 
+        trim: true 
     },
     password: { 
         type: String, 
-        required: true // Specify that password is required
+        required: true 
     }
 });
 
-// Create and export the 'User' model based on the schema
+// Create and export the 'User' model based on the defined schema
 module.exports = mongoose.model('Userdetails', userSchema);
