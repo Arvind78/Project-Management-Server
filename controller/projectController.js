@@ -2,14 +2,11 @@ const projectModel = require("../model/projectModel");
 
 //Adds a new project to the database.
 const addProject = async (req, res, next) => {
+    const { startDate, endDate} = req.body;
+
     try {
-        const { project, reason, type, division, category, priority, department, startDate, endDate, location } = req.body;
-
-        if (!project || !reason || !type || !division || !category || !priority || !department || !startDate || !endDate || !location) {
-            return res.status(400).json({ message: "All fields are required!" });
-        }
-
-        const startdate = new Date(startDate);
+        
+        Date(startDate);
         const start = startdate.toLocaleDateString('en-GB', {
             day: 'numeric', month: 'short', year: 'numeric'
         }).replace(/ /g, '-');
@@ -114,22 +111,47 @@ const getDepartmentSuccessPercentage = async (req, res, next) => {
 // Retrieves various statistics about the projects.
 const projectCounter = async (req, res, next) => {
     try {
-        const totalProjects = await projectModel.countDocuments();
-        const totalClosedProjects = await projectModel.countDocuments({ status: 'Closed' });
-        const totalRunningProjects = await projectModel.countDocuments({ status: 'Running' });
-        const totalCancelledProjects = await projectModel.countDocuments({ status: 'Cancelled' });
-
         const currentDate = new Date();
-        const year = currentDate.getFullYear();
-        const month = String(currentDate.getMonth() + 1).padStart(2, '0');  
-        const day = String(currentDate.getDate()).padStart(2, '0');
-        const today = `${year}-${month}-${day}`; 
+        const today = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
 
-        const totalDelayedProjects = await projectModel.countDocuments({
-            status: { $ne: 'Closed' },
-            endDate: { $lt: today },
-            startDate: { $lt: today }
-        });
+        const projectStats = await projectModel.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalProjects: { $sum: 1 },
+                    totalClosedProjects:
+                     { $sum: { $cond: [{ $eq: ["$status", "Closed"] }, 1, 0] } },
+                    totalRunningProjects: 
+                    { $sum: { $cond: [{ $eq: ["$status", "Running"] }, 1, 0] } },
+                    totalCancelledProjects: { 
+                        $sum: { $cond: [{ $eq: ["$status", "Cancelled"] }, 1, 0] } },
+                    totalDelayedProjects: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $ne: ["$status", "Closed"] },
+                                        { $ne: ["$status", "Cancelled"] },//not count the cancelled project
+                                        { $lt: ["$endDate", today] }
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    }
+                }
+            }
+        ]);
+
+        // Extracting the project stats from the aggregation result
+        const {
+            totalProjects,
+            totalClosedProjects,
+            totalRunningProjects,
+            totalCancelledProjects,
+            totalDelayedProjects
+        } = projectStats[0];
 
         return res.status(200).json({
             totalProjects,
@@ -142,6 +164,7 @@ const projectCounter = async (req, res, next) => {
         next(error);
     }
 };
+
 
 // exports functions related to project management operations.
 module.exports = {
