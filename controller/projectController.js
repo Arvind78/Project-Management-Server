@@ -6,7 +6,7 @@ const addProject = async (req, res, next) => {
 
     try {
         
-        Date(startDate);
+          const  startdate = Date(startDate);
         const start = startdate.toLocaleDateString('en-GB', {
             day: 'numeric', month: 'short', year: 'numeric'
         }).replace(/ /g, '-');
