@@ -2,7 +2,7 @@
 const express = require("express");
 const cors = require('cors');
 const connectToDatabase = require("./connection/dbConnection");
-const router = require("./router/router");
+const router = require("./routers/router");
 const dotenv = require('dotenv').config();
 
 // Create an Express application

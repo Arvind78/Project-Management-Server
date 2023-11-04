@@ -12,6 +12,7 @@ const projectSchema = new mongoose.Schema({
   startDate: { type: String, required: true },
   endDate: { type: String, required: true },
   location: { type: String, required: true },
+  projectLeader:{ type: String, required: true },
   status: { type: String, default: 'Registered' }  
 });
 

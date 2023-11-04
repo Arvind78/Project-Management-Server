@@ -1,6 +1,6 @@
 const express = require('express');
-const { userLogin, userSignup, forgotPassword } = require('../controller/userController');
-const { addProject, getProjects, updateProject, sortProject, getDepartmentSuccessPercentage, projectCounter } = require('../controller/projectController');
+const { userLogin, userSignup, forgotPassword } = require('../controllers/userController');
+const { addProject, getProjects, updateProject, sortProject, getDepartmentSuccessPercentage, projectCounter } = require('../controllers/projectController');
 // Creating an Express router instance
 const router = express.Router();  
 
@@ -19,3 +19,4 @@ router.get("/project/counter", projectCounter);
 
 // Exporting the router for use in the main application
 module.exports = router;
+
